@@ -23,7 +23,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
 
 
-    private String hell="helo";
+
+    private String helloword="helloworld";
+
 
     //中间内容栏
     private FrameLayout mBodyLayout;
