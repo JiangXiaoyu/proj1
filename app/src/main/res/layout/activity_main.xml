@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@android:color/white"
+        android:orientation="vertical">
+
+        <include layout="@layout/main_title_bar" />
+
+        <FrameLayout
+            android:id="@+id/main_body"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@android:color/white">
+
+        </FrameLayout>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/main_bottom_bar"
+        android:layout_width="match_parent"
+        android:layout_height="55dp"
+        android:layout_alignParentBottom="true"
+        android:background="#F2F2F2"
+        android:orientation="horizontal">
+
+        <RelativeLayout
+            android:id="@+id/bottom_bar_mainpage_btn"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1">
+
+            <TextView
+                android:id="@+id/bottom_bar_mainpage_btn_text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_centerHorizontal="true"
+                android:layout_marginBottom="5dp"
+                android:gravity="center"
+                android:lines="1"
+                android:text="首页"
+                android:textColor="#666666"
+                android:textSize="14sp" />
+
+            <ImageView
+                android:id="@+id/bottom_bar_mainpage_btn_image"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_above="@id/bottom_bar_mainpage_btn_text"
+                android:layout_alignParentTop="true"
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop="5dp"
+                android:src="@drawable/mainpage_icon" />
+
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/bottom_bar_news_btn"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1">
+
+            <TextView
+                android:id="@+id/bottom_bar_news_btn_text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_centerHorizontal="true"
+                android:layout_marginBottom="5dp"
+                android:gravity="center"
+                android:lines="1"
+                android:text="资讯"
+                android:textColor="#666666"
+                android:textSize="14sp" />
+
+            <ImageView
+                android:id="@+id/bottom_bar_news_btn_image"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_above="@id/bottom_bar_news_btn_text"
+                android:layout_alignParentTop="true"
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop="5dp"
+                android:src="@drawable/news_icon" />
+
+        </RelativeLayout>
+
+
+        <RelativeLayout
+            android:id="@+id/bottom_bar_my_btn"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1">
+
+            <TextView
+                android:id="@+id/bottom_bar_my_btn_text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_centerHorizontal="true"
+                android:layout_marginBottom="5dp"
+                android:gravity="center"
+                android:lines="1"
+                android:text="我的"
+                android:textColor="#666666"
+                android:textSize="14sp" />
+
+            <ImageView
+                android:id="@+id/bottom_bar_my_btn_image"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_above="@id/bottom_bar_my_btn_text"
+                android:layout_alignParentTop="true"
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop="5dp"
+                android:src="@drawable/my_icon" />
+
+        </RelativeLayout>
+    </LinearLayout>
+
+
+</RelativeLayout>
