@@ -1,23 +1,33 @@
 package com.guyue.proj1.fragment;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
 import com.guyue.proj1.R;
+import com.guyue.proj1.activity.NewsDetailActivity;
+import com.guyue.proj1.adapter.AdBannerAdapter;
+import com.guyue.proj1.bean.NewsBean;
 
 /**
  * Created by huyun on 2018/3/20.
  */
 
-public class AdBannerFragment extends Fragment {
+public class AdBannerFragment extends Fragment implements View.OnClickListener{
 
-    private String ab;
+    private static final String TAG="AdBannerFragment";
+    private NewsBean news;
     private ImageView iv;
+    private TextView tv;
+
 
     public static AdBannerFragment newInstance(Bundle args){
         AdBannerFragment af=new AdBannerFragment();
@@ -29,21 +39,17 @@ public class AdBannerFragment extends Fragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Bundle arg=getArguments();
-        ab=arg.getString("ad");
+        news= (NewsBean) arg.getSerializable("news");
+
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        if(ab!=null){
-            if("banner_1".equals(ab)){
-                iv.setImageResource(R.drawable.banner_1);
-            }else if("banner_2".equals(ab)){
-                iv.setImageResource(R.drawable.banner_2);
-            }else if("banner_3".equals(ab)){
-                iv.setImageResource(R.drawable.banner_3);
-            }
-        }
+        //加载广告图片
+        Glide.with(getActivity()).load(news.getImageUrl()).into(iv);
+        tv.setText(news.getTitle());
+        iv.setOnClickListener(this);
     }
 
     @Override
@@ -58,12 +64,20 @@ public class AdBannerFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
 
-        iv=new ImageView(getActivity());
-        ViewGroup.LayoutParams lp=new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,ViewGroup.LayoutParams.MATCH_PARENT);
-        iv.setLayoutParams(lp);
-        iv.setScaleType(ImageView.ScaleType.FIT_XY);
+        View view=inflater.inflate(R.layout.adbanner_fragment_layout,container,false);
+        iv=view.findViewById(R.id.imageview);
+        tv=view.findViewById(R.id.textview);
 
-        return iv;
 
+        return view;
+
+    }
+
+    @Override
+    public void onClick(View view) {
+        Intent intent=new Intent(getActivity(),NewsDetailActivity.class);
+        String url=news.getContentUrl();
+        intent.putExtra("url",url);
+        getActivity().startActivity(intent);
     }
 }

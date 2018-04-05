@@ -11,6 +11,7 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Display;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -29,6 +30,7 @@ import com.guyue.proj1.bean.LotteryInfo;
 import com.guyue.proj1.bean.LotterySort;
 import com.guyue.proj1.bean.NewsBean;
 import com.guyue.proj1.utils.AnalysisUtils;
+import com.guyue.proj1.utils.HttpUtils;
 
 
 import org.json.JSONArray;
@@ -42,6 +44,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
 
 import okhttp3.Call;
 import okhttp3.FormBody;
@@ -59,7 +62,9 @@ public class MainpageView{
 
     private ListView lv_list;
     private NewsAdapter newsAdapter;
-    private List<NewsBean> newses;
+    private List<NewsBean> adNewses; //主页广告数据
+    private List<NewsBean> newses; //主页显示的新闻数据
+
 
     private FragmentActivity mContext;
     private LayoutInflater mInflater;
@@ -92,10 +97,11 @@ public class MainpageView{
      */
     private void createView() {
         mHandler = new MHandler();
-        initAdData(); //初始化广告数据
-        getNewsData();
-        initLotteryData();
-        initView();
+        getNewsData(); //获取新闻数据
+        initLotteryData(); //初始化彩票数据
+
+        init();
+
         new AdAutoSlidThread().start();
 
     }
@@ -103,28 +109,39 @@ public class MainpageView{
     /**
      * 初始化广告中的数据
      */
-    private void initAdData() {
-        lotterySorts = new ArrayList<LotterySort>();
-        for (int i = 0; i < 3; i++) {
-            LotterySort lotterySort = new LotterySort();
-            lotterySort.id = (i + 1);
-            switch (i) {
+    private void initAdNewses() {
+        final CountDownLatch countDownLatch = new CountDownLatch(1);
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                String jsonString= HttpUtils.okhttpUtil(100);
+                adNewses=HttpUtils.parseJsonString("hot",jsonString,mContext);
+                for(int i=0;i<adNewses.size();i++){
+                    Log.d("MaiinpageView",adNewses.get(i).getTitle());
+                }
+                countDownLatch.countDown();
 
-                case 0:
-                    lotterySort.icon = "banner_1";
-                    break;
-                case 1:
-                    lotterySort.icon = "banner_2";
-                    break;
-                case 2:
-                    lotterySort.icon = "banner_3";
-                    break;
-                default:
-                    break;
             }
-            lotterySorts.add(lotterySort);
+        }).start();
 
+        try {
+            countDownLatch.await();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
+
+
+        if (adNewses != null) {
+            if (adNewses.size() > 0) {
+                vpi.setCount(adNewses.size());
+                vpi.setCurrentPosition(0);
+            }
+            ada.setDatas(adNewses);
+        }
+
+
+
+
     }
 
     /**
@@ -140,11 +157,16 @@ public class MainpageView{
                     if (ada.getCount() > 0) {
                         adPager.setCurrentItem(adPager.getCurrentItem() + 1);
                     }
+
                     break;
 
                 case 1:
+
                     String jsonString=(String) msg.obj;
-                    parseJsontoLotteryInfo(jsonString);
+                    parseJsontoNewses(jsonString);
+
+
+
                     newsAdapter.setData(newses);
                     lv_list.setAdapter(newsAdapter);
                     //设置lv_list高度
@@ -173,7 +195,7 @@ public class MainpageView{
         return (int)(dpValue*scale+0.5f);
     }
 
-    private void parseJsontoLotteryInfo(String jsonString) {
+    private void parseJsontoNewses(String jsonString) {
         newses = new ArrayList<>();
         try {
             JSONObject jsonObject = new JSONObject(jsonString);
@@ -217,7 +239,7 @@ public class MainpageView{
     /**
      * 初始化控件
      */
-    private void initView() {
+    private void init() {
         mCurrentView = mInflater.inflate(R.layout.mainpage, null);
 
         //新闻列表
@@ -226,17 +248,15 @@ public class MainpageView{
 
         //显示广告的ViewPager
         adPager = mCurrentView.findViewById(R.id.vp_advertBanner);
-//        adPager.setLongClickable(false);
-        ada = new AdBannerAdapter(mContext.getSupportFragmentManager(), mHandler);
+        adPager.setLongClickable(false);
+        ada = new AdBannerAdapter(mContext.getSupportFragmentManager(),mHandler);
         adPager.setAdapter(ada);                //为adPager(ViewPager)设置适配器
         adPager.setOnTouchListener(ada);
-
-
-
-
         vpi = mCurrentView.findViewById(R.id.vpi_advert_indicator);
         vpi.setCount(ada.getSize()); //设置小圆点的个数
         adBannerLay = mCurrentView.findViewById(R.id.rl_adBanner); //广告条容器
+        initAdNewses();  //初始化ViewPager相关的数据
+
 
         gv_lotterysort = mCurrentView.findViewById(R.id.gv_lotterysort);
         String[] from = {"img", "text"};
@@ -255,6 +275,8 @@ public class MainpageView{
         });
 
 
+
+        //设置ViewPager页面改变监听器
         adPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
 
             @Override
@@ -278,16 +300,16 @@ public class MainpageView{
 
         resetSize();
 
-        if (lotterySorts != null) {
-            if (lotterySorts.size() > 0) {
-                vpi.setCount(lotterySorts.size());
-                vpi.setCurrentPosition(0);
-            }
-            ada.setDatas(lotterySorts);
-        }
 
 
     }
+
+
+
+
+
+
+
 
     /**
      * 计算控件大小
@@ -332,21 +354,11 @@ public class MainpageView{
 
     }
 
-//    public void getNewsData() {
-//        try {
-//            InputStream is = mContext.getResources().getAssets().open("news.xml");
-//            newses = AnalysisUtils.getNewsInfo(is);
-//            Log.d("MainpageView", newses.toString());
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-//
-//
-//    }
+
 
     public void getNewsData() {
+
+
         String url = "http://toutiao-ali.juheapi.com/toutiao/index";
         String appcode = "1b2556a6a5a0446d8be17f74d033abfb";
         final Request.Builder builder = new Request.Builder().url(url);

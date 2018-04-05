@@ -1,5 +1,7 @@
 package com.guyue.proj1.adapter;
 
+import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
@@ -7,8 +9,11 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.Toast;
 
+import com.guyue.proj1.activity.NewsDetailActivity;
 import com.guyue.proj1.bean.LotterySort;
+import com.guyue.proj1.bean.NewsBean;
 import com.guyue.proj1.fragment.AdBannerFragment;
 import com.guyue.proj1.view.MainpageView;
 
@@ -22,25 +27,26 @@ import java.util.List;
 public class AdBannerAdapter extends FragmentStatePagerAdapter implements View.OnTouchListener {
 
     private Handler mHandler;
-    private List<LotterySort> lotterySorts;
-
+    private List<NewsBean> newses;
+    public static int newsPosition;
 
     public AdBannerAdapter(FragmentManager fm) {
         super(fm);
-        lotterySorts = new ArrayList<LotterySort>();
+        newses=new ArrayList<>();
     }
 
-    public AdBannerAdapter(FragmentManager fm, Handler mHandler) {
+    public AdBannerAdapter(FragmentManager fm, Handler handler) {
         super(fm);
-        this.mHandler = mHandler;
-        lotterySorts = new ArrayList<LotterySort>();
+        this.mHandler = handler;
+        newses=new ArrayList<>();
+
     }
 
     /**
      * 设置数据更新界面
      */
-    public void setDatas(List<LotterySort> lotterySorts) {
-        this.lotterySorts = lotterySorts;
+    public void setDatas(List<NewsBean> newses) {
+        this.newses = newses;
         notifyDataSetChanged();
     }
 
@@ -49,7 +55,7 @@ public class AdBannerAdapter extends FragmentStatePagerAdapter implements View.O
      * @return
      */
     public int getSize() {
-        return lotterySorts == null ? 0 : lotterySorts.size();
+        return newses == null ? 0 : newses.size();
     }
 
 
@@ -59,12 +65,14 @@ public class AdBannerAdapter extends FragmentStatePagerAdapter implements View.O
         return POSITION_NONE;
     }
 
+
     @Override
     public Fragment getItem(int position) {
         Bundle args=new Bundle();
-        if(lotterySorts.size()>0){
-            args.putString("ad",lotterySorts.get(position % lotterySorts.size()).icon);
+        if(newses.size()>0){
+            args.putSerializable("news",newses.get(position % newses.size()));
         }
+        newsPosition=position % newses.size();
         return AdBannerFragment.newInstance(args);
     }
 
@@ -76,6 +84,9 @@ public class AdBannerAdapter extends FragmentStatePagerAdapter implements View.O
     @Override
     public boolean onTouch(View view, MotionEvent motionEvent) {
         mHandler.removeMessages(MainpageView.MSG_AD_SLID);
+
         return false;
     }
+
+
 }
