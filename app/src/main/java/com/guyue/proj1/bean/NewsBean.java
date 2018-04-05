@@ -1,23 +1,26 @@
 package com.guyue.proj1.bean;
 
+import android.os.Parcelable;
 import android.widget.ImageView;
+
+import java.io.Serializable;
 
 /**
  * Created by huyun on 2018/3/21.
  */
 
-public class NewsBean {
-    private int id;
+public class NewsBean implements Serializable{
+    private String id;
     private String title;
     private String from;
     private String imageUrl;
     private String contentUrl;
 
-    public int getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(String id) {
         this.id = id;
     }
 

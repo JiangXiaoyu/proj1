@@ -23,8 +23,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
 
 
-
-
     //中间内容栏
     private FrameLayout mBodyLayout;
     //底部按钮栏

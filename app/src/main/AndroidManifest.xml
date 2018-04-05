@@ -28,7 +28,6 @@
         <activity android:name=".activity.FindPassActivity" />
         <activity android:name=".activity.LotteryInfoActivity" />
         <activity android:name=".activity.NewsDetailActivity" />
-        <activity android:name=".activity.Main2Activity"></activity>
     </application>
 
 </manifest>

@@ -43,7 +43,7 @@ public class AnalysisUtils {
                     } else if ("news".equals(parser.getName())) {
                         news = new NewsBean();
                         String ids = parser.getAttributeValue(0);
-                        news.setId(Integer.parseInt(ids));
+//                        news.setId(Integer.parseInt(ids));
                     } else if ("title".equals(parser.getName())) {
                         news.setTitle(parser.nextText());
                     } else if ("from".equals(parser.getName())) {
