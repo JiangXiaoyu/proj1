@@ -58,17 +58,13 @@
                     android:textSize="20sp"
                     android:textStyle="bold" />
 
-                <ListView
+                <com.guyue.proj1.view.NoScrollListView
                     android:id="@+id/lv_list"
                     android:layout_width="match_parent"
-                    android:layout_height="1000px">
+                    android:layout_height="wrap_content">
 
-                    <!--android:background="#C0C0C0"-->
-                    <!--android:dividerHeight="0dp"-->
-                    <!--android:divider="@null"-->
-                    <!--android:scrollbars="none"-->
+                </com.guyue.proj1.view.NoScrollListView>
 
-                </ListView>
             </LinearLayout>
         </LinearLayout>
     </ScrollView>

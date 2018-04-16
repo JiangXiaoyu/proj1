@@ -10,11 +10,14 @@
             android:id="@+id/tv_qishu"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="10dp"
+            android:paddingLeft="10dp"
+            android:paddingTop="3dp"
+            android:paddingBottom="3dp"
             android:layout_marginTop="10dp"
             android:text="期数"
+            android:background="#DDDDDD"
             android:textColor="@android:color/black"
-            android:textSize="20sp" />
+            android:textSize="18sp" />
 
         <TextView
             android:id="@+id/tv_content"
@@ -22,8 +25,9 @@
             android:layout_height="0dp"
             android:layout_weight="1"
             android:layout_marginLeft="10dp"
-            android:gravity="center_vertical"
-            android:text="开奖时间"
+            android:gravity="center"
+            android:layout_marginTop="10dp"
+            android:text="开奖信息"
             android:textColor="@android:color/holo_red_dark"
             android:textSize="18sp" />
 
@@ -31,9 +35,10 @@
             android:id="@+id/tv_time"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="10dp"
+            android:layout_marginTop="5dp"
             android:layout_marginLeft="10dp"
             android:text="开奖时间"
+            android:gravity="right"
             android:textColor="@android:color/darker_gray"
             android:textSize="14sp" />
         <View

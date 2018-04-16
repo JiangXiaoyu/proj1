@@ -11,12 +11,9 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Display;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.GridView;
-import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.Toast;
@@ -26,32 +23,19 @@ import com.guyue.proj1.activity.LotteryInfoActivity;
 import com.guyue.proj1.activity.NewsDetailActivity;
 import com.guyue.proj1.adapter.AdBannerAdapter;
 import com.guyue.proj1.adapter.NewsAdapter;
-import com.guyue.proj1.bean.LotteryInfo;
 import com.guyue.proj1.bean.LotterySort;
 import com.guyue.proj1.bean.NewsBean;
-import com.guyue.proj1.utils.AnalysisUtils;
 import com.guyue.proj1.utils.HttpUtils;
-
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.sql.SQLOutput;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
-
-import okhttp3.Call;
-import okhttp3.FormBody;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.RequestBody;
-import okhttp3.Response;
 
 
 /**
@@ -59,6 +43,7 @@ import okhttp3.Response;
  */
 
 public class MainpageView{
+    private static final String TAG = "MainpageView";
 
     private ListView lv_list;
     private NewsAdapter newsAdapter;
@@ -99,10 +84,76 @@ public class MainpageView{
         mHandler = new MHandler();
         getNewsData(); //获取新闻数据
         initLotteryData(); //初始化彩票数据
-
         init();
 
         new AdAutoSlidThread().start();
+
+    }
+
+
+    /**
+     * 事件捕获
+     */
+    class MHandler extends Handler {
+
+        @Override
+        public void dispatchMessage(Message msg) {
+            super.dispatchMessage(msg);
+            switch (msg.what) {
+                case MSG_AD_SLID:
+                    if (ada.getCount() > 0) {
+                        adPager.setCurrentItem(adPager.getCurrentItem() + 1);
+                    }
+
+                    break;
+
+                case 1:
+                    newsAdapter.setData(newses);
+                    lv_list.setAdapter(newsAdapter);
+                    lv_list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                        @Override
+                        public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                            Intent intent=new Intent(mContext, NewsDetailActivity.class);
+                            String url=newses.get(i).getContentUrl();
+                            intent.putExtra("url",url);
+                            mContext.startActivity(intent);
+                        }
+                    });
+
+            }
+        }
+    }
+
+
+    /**
+     * 获取首页新闻数据
+     */
+    public void getNewsData() {
+
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                newses= HttpUtils.getNewses(20);
+                if(newses==null){
+                    Toast.makeText(mContext,"加载新闻失败",Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                for(int i=3;i<newses.size();i++){
+                    Log.d(TAG, "getNewsesData: "+newses.get(i).getTitle());
+                }
+
+
+                Message msg = new Message();
+                msg.what = 1;
+                mHandler.sendMessage(msg);
+
+            }
+        }).start();
+
+
+
 
     }
 
@@ -114,10 +165,13 @@ public class MainpageView{
         new Thread(new Runnable() {
             @Override
             public void run() {
-                String jsonString= HttpUtils.okhttpUtil(100);
-                adNewses=HttpUtils.parseJsonString("hot",jsonString,mContext);
+                adNewses= HttpUtils.getNewses(3);
+                if(adNewses==null){
+                    Toast.makeText(mContext,"加载广告失败",Toast.LENGTH_SHORT).show();
+                    return;
+                }
                 for(int i=0;i<adNewses.size();i++){
-                    Log.d("MaiinpageView",adNewses.get(i).getTitle());
+                    Log.d(TAG,"initAdNewses:"+adNewses.get(i).getTitle());
                 }
                 countDownLatch.countDown();
 
@@ -144,97 +198,7 @@ public class MainpageView{
 
     }
 
-    /**
-     * 事件捕获
-     */
-    class MHandler extends Handler {
 
-        @Override
-        public void dispatchMessage(Message msg) {
-            super.dispatchMessage(msg);
-            switch (msg.what) {
-                case MSG_AD_SLID:
-                    if (ada.getCount() > 0) {
-                        adPager.setCurrentItem(adPager.getCurrentItem() + 1);
-                    }
-
-                    break;
-
-                case 1:
-
-                    String jsonString=(String) msg.obj;
-                    parseJsontoNewses(jsonString);
-
-
-
-                    newsAdapter.setData(newses);
-                    lv_list.setAdapter(newsAdapter);
-                    //设置lv_list高度
-                    ViewGroup.LayoutParams params = lv_list.getLayoutParams();
-                    params.height=dp2px(mContext,newses.size()*120);
-                    lv_list.setLayoutParams(params);
-
-                    lv_list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                        @Override
-                        public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                            Intent intent=new Intent(mContext, NewsDetailActivity.class);
-                            String url=newses.get(i).getContentUrl();
-                            intent.putExtra("url",url);
-                            mContext.startActivity(intent);
-                        }
-                    });
-
-            }
-        }
-    }
-    /**
-     * dp转换成px
-     */
-    private int dp2px(Context context, float dpValue){
-        float scale=context.getResources().getDisplayMetrics().density;
-        return (int)(dpValue*scale+0.5f);
-    }
-
-    private void parseJsontoNewses(String jsonString) {
-        newses = new ArrayList<>();
-        try {
-            JSONObject jsonObject = new JSONObject(jsonString);
-            JSONObject result = jsonObject.getJSONObject("result");
-            JSONArray data=result.getJSONArray("data");
-
-            for (int i = 0; i < data.length(); i++) {
-                NewsBean newsBean = new NewsBean();
-                JSONObject item = data.getJSONObject(i);
-                newsBean.setTitle(item.getString("title"));
-                newsBean.setFrom(item.getString("author_name")+"  "+item.getString("date"));
-                newsBean.setImageUrl(item.getString("thumbnail_pic_s"));
-                newsBean.setContentUrl(item.getString("url"));
-                newses.add(newsBean);
-            }
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
-    }
-    /**
-     * 广告自动滑动
-     */
-    class AdAutoSlidThread extends Thread {
-        @Override
-        public void run() {
-            super.run();
-            while (true) {
-                try {
-                    sleep(5000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                if (mHandler != null) {
-                    mHandler.sendEmptyMessage(MSG_AD_SLID);
-                }
-            }
-        }
-    }
 
     /**
      * 初始化控件
@@ -266,7 +230,6 @@ public class MainpageView{
         gv_lotterysort.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
-//                Toast.makeText(mContext, "点击-"+arg2+"-"+arg3, Toast.LENGTH_SHORT).show();
                 Intent intent = new Intent(mContext, LotteryInfoActivity.class);
                 intent.putExtra("flag", arg2);
                 mContext.startActivity(intent);
@@ -305,7 +268,25 @@ public class MainpageView{
     }
 
 
-
+    /**
+     * 广告自动滑动
+     */
+    class AdAutoSlidThread extends Thread {
+        @Override
+        public void run() {
+            super.run();
+            while (true) {
+                try {
+                    sleep(5000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                if (mHandler != null) {
+                    mHandler.sendEmptyMessage(MSG_AD_SLID);
+                }
+            }
+        }
+    }
 
 
 
@@ -356,42 +337,7 @@ public class MainpageView{
 
 
 
-    public void getNewsData() {
 
-
-        String url = "http://toutiao-ali.juheapi.com/toutiao/index";
-        String appcode = "1b2556a6a5a0446d8be17f74d033abfb";
-        final Request.Builder builder = new Request.Builder().url(url);
-        builder.addHeader("Authorization", "APPCODE " + appcode);  //将请求头以键值对形式添加，可添加多个请求头
-        RequestBody requestBody = new FormBody.Builder().add("type", "tiyu").build();
-        final Request request = builder.build();
-        builder.post(requestBody);
-        final OkHttpClient client = new OkHttpClient.Builder().build(); //设置各种超时时间
-        final Call call = client.newCall(request);
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    Response response = call.execute();
-                    String jsonString=response.body().string();
-
-                    if (response != null) {
-                        Message msg = new Message();
-                        msg.what = 1;
-                        msg.obj =jsonString;
-                        mHandler.sendMessage(msg);
-                    } else {
-                        Log.d("guyue", "response is null");
-
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }).start();
-
-
-    }
 
     /**
      * 获取当前在导航栏上方显示对应的View

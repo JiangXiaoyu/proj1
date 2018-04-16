@@ -87,7 +87,7 @@ public class NewsAdapter extends BaseAdapter {
 
         if(news!=null){
             vh.tv_title.setText(news.getTitle());
-            vh.tv_from.setText(news.getFrom());
+            vh.tv_from.setText(news.getFrom()+" "+news.getPublishTime());
 
             final MyHandler handler=new MyHandler(vh.iv_newsimage);
 

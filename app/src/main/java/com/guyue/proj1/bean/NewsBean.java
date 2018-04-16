@@ -13,6 +13,7 @@ public class NewsBean implements Serializable{
     private String id;
     private String title;
     private String from;
+    private String publishTime;
     private String imageUrl;
     private String contentUrl;
 
@@ -38,6 +39,14 @@ public class NewsBean implements Serializable{
 
     public void setFrom(String from) {
         this.from = from;
+    }
+
+    public String getPublishTime() {
+        return publishTime;
+    }
+
+    public void setPublishTime(String publishTime) {
+        this.publishTime = publishTime;
     }
 
     public String getImageUrl() {
